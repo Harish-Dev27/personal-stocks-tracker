@@ -2,7 +2,7 @@ import json
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 from aws_lambda_powertools.utilities.data_classes.event_source  import event_source
 
-from utils.Logger import logger
+from src.utils.Logger import logger
 
 '''
 This function will be triggered by Eventbridge scheduler every day once
