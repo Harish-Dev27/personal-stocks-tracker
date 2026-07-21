@@ -60,11 +60,11 @@ jobs:
 
       - name: Upload ZIP to S3
         run: |
-          aws s3 cp lambda.zip s3://${env.S3_BUCKET}/lambda.zip
+          aws s3 cp lambda.zip s3://${S3_BUCKET}/lambda.zip
 
       - name: Update Lambda
         run: |
           aws lambda update-function-code \
-            --function-name ${env.LAMBDA_FUNCTION_NAME} \
-            --s3-bucket ${env.S3_BUCKET} \
+            --function-name ${LAMBDA_FUNCTION_NAME} \
+            --s3-bucket ${S3_BUCKET} \
             --s3-key lambda.zip
