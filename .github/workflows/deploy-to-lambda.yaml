@@ -1,5 +1,8 @@
 name: Deploy Lambda
 
+# TODO
+# To maintain sanity, segregate lib as layer and keep code alone packaged separately
+
 on:
   push:
     branches:
