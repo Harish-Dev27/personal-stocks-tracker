@@ -8,4 +8,5 @@ dependencies = [
     "aws-lambda-powertools>=3.31.1",
     "boto3>=1.43.51",
     "requests>=2.34.2",
+    "yfinance>=1.5.1",
 ]
