@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-  S3_BUCKET: ${{ vars.S3_BUCKET }}
+  AWS_REGION: ap-south-1
+  S3_BUCKET: stocks-tracker-lambda
   LAYER_NAME: lambda-layer
-  LAMBDA_FUNCTION_NAME: stocks-tracker-lambda
+  LAMBDA_FUNCTION_NAME: my-sample-function
 
 jobs:
   deploy-layer:
@@ -58,7 +58,7 @@ jobs:
         run: |
           LAYER_VERSION_ARN=$(aws lambda publish-layer-version \
             --layer-name "$LAYER_NAME" \
-            --content S3Bucket=$S3_BUCKET,S3Key=layer.zip \
+            --content S3Bucket=$S3_BUCKET,S3Key=lambda-layer.zip \
             --compatible-runtimes python3.14 \
             --query LayerVersionArn \
             --output text)
