@@ -1,8 +1,5 @@
 name: Deploy Lambda
 
-# TODO
-# To maintain sanity, segregate lib as layer and keep code alone packaged separately
-
 on:
   push:
     branches:
@@ -26,27 +23,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.14"
 
-      - name: Install dependencies
-        run: uv sync
-
       - name: Build Lambda package
         run: |
           mkdir package
-
-          # Install dependencies into deployment package
-          uv export --no-dev --format requirements-txt > requirements.txt
-
-          pip install \
-            -r requirements.txt \
-            -t package
 
           # Copy application code
           cp -r src/* package/
