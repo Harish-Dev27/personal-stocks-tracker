@@ -58,7 +58,7 @@ jobs:
         run: |
           LAYER_VERSION_ARN=$(aws lambda publish-layer-version \
             --layer-name "$LAYER_NAME" \
-            --content S3Bucket=$S3_BUCKET,S3Key=layer.zip \
+            --content S3Bucket=$S3_BUCKET,S3Key=lambda-layer.zip \
             --compatible-runtimes python3.14 \
             --query LayerVersionArn \
             --output text)
