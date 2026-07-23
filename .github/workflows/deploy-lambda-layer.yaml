@@ -1,0 +1,84 @@
+name: Deploy Lambda Layer
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
+  LAYER_NAME: lambda-layer
+  LAMBDA_FUNCTION_NAME: stocks-tracker-lambda
+
+jobs:
+  deploy-layer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Export dependencies
+        run: |
+          uv export \
+            --no-dev \
+            --format requirements-txt \
+            -o requirements.txt
+
+      - name: Build Layer
+        run: |
+          mkdir python
+
+          pip install \
+            -r requirements.txt \
+            -t python
+
+          zip -r layer.zip python
+
+      - name: Upload Layer to S3
+        run: |
+          aws s3 cp layer.zip s3://$S3_BUCKET/lambda-layer.zip
+
+      - name: Publish Layer Version
+        id: publish
+        run: |
+          LAYER_VERSION_ARN=$(aws lambda publish-layer-version \
+            --layer-name "$LAYER_NAME" \
+            --content S3Bucket=$S3_BUCKET,S3Key=layer.zip \
+            --compatible-runtimes python3.14 \
+            --query LayerVersionArn \
+            --output text)
+
+          echo "layer_arn=$LAYER_VERSION_ARN" >> $GITHUB_OUTPUT
+
+      - name: Get Existing Layers
+        id: existing
+        run: |
+          EXISTING=$(aws lambda get-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --query 'Layers[].Arn' \
+            --output text)
+
+          echo "existing_layers=$EXISTING" >> $GITHUB_OUTPUT
+
+      - name: Update Lambda Layer
+        run: |
+          aws lambda update-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --layers \
+              ${{ steps.publish.outputs.layer_arn }} \
+              ${{ steps.existing.outputs.existing_layers }}
