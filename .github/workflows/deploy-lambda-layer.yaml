@@ -7,7 +7,7 @@ env:
   AWS_REGION: ap-south-1
   S3_BUCKET: stocks-tracker-lambda
   LAYER_NAME: lambda-layer
-  LAMBDA_FUNCTION_NAME: stocks-tracker-lambda
+  LAMBDA_FUNCTION_NAME: my-sample-function
 
 jobs:
   deploy-layer:
