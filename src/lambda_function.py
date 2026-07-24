@@ -5,7 +5,7 @@ from utils.Logger import logger
 from helper.EnvironmentVars import stocks
 from interface.StocksInfo import StocksInfo
 from helper import LambdaResponse
-from interface.OpenAI import OpenAI
+from interface.OpenAIHelper import OpenAIHelper
 
 
 '''
@@ -23,7 +23,7 @@ def lambda_handler(event: EventBridgeEvent, context):
 
     # TODO
     # Send price information to OpenAI model and ask it fetch latest news and give all info mapped with stocks
-    ai = OpenAI()
+    ai = OpenAIHelper()
     ai.chat_with_ai()
 
     # Once AI message content is ready, send it to end user via telegram bot/AWS SNS

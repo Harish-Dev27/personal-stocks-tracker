@@ -2,7 +2,7 @@ from openai import OpenAI
 from helper.GetSecrets import GetSecrets
 from utils.Logger import logger
 
-class OpenAI:
+class OpenAIHelper:
 
     def __init__(self):
         self.client = OpenAI(api_key=GetSecrets.get_secret())
