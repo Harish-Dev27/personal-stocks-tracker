@@ -65,20 +65,9 @@ jobs:
 
           echo "layer_arn=$LAYER_VERSION_ARN" >> $GITHUB_OUTPUT
 
-      - name: Get Existing Layers
-        id: existing
-        run: |
-          EXISTING=$(aws lambda get-function-configuration \
-            --function-name "$LAMBDA_FUNCTION_NAME" \
-            --query 'Layers[].Arn' \
-            --output text)
-
-          echo "existing_layers=$EXISTING" >> $GITHUB_OUTPUT
-
       - name: Update Lambda Layer
         run: |
           aws lambda update-function-configuration \
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --layers \
-              ${{ steps.publish.outputs.layer_arn }} \
-              ${{ steps.existing.outputs.existing_layers }}
+              ${{ steps.publish.outputs.layer_arn }}

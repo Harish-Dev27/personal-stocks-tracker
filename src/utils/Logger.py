@@ -5,6 +5,7 @@ from typing import Optional
 from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools import Logger as PowertoolsLogger
+from helper.EnvironmentVars import log_level
 
 
 class Logger:
@@ -15,12 +16,12 @@ class Logger:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, service: str = "personal-stocks-tracker") -> None:
+    def __init__(self, service: str = "personal-stocks-tracker", level: str = log_level) -> None:
         if getattr(self, "_initialized", False):
             return
 
-        self._logger = PowertoolsLogger(service=service)
-        
+        self._logger = PowertoolsLogger(service=service, level=level)
+
         now = datetime.now(ZoneInfo("Asia/Kolkata"))
         self.timestamp = now.strftime("%Y-%m-%dT%H:%M:%S")
 
