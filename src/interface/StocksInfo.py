@@ -1,4 +1,5 @@
 import yfinance as yf
+from utils.Logger import logger
 
 class StocksInfo:
 
@@ -11,11 +12,13 @@ class StocksInfo:
     and then populate it into a list
     """
     def get_stocks_latest_price(self):
+        try:
+            stock_info_list = []
+            for stock in self.stocks: 
+                stock_info = yf.Ticker(f"{stock.upper()}.NS")
+                stock_info_list.append({stock : stock_info.history(period="1d")})
 
-        stock_info_list = []
-        for stock in self.stocks: 
-           stock_info = yf.Ticker(f"{stock.upper()}.NS")
-           stock_info_list.append({stock : stock_info.history(period="1d")})
-
-        return stock_info_list        
-            
+            return stock_info_list
+        except Exception as e:
+            logger.error(f"ERROR", "Unable to get stocks information. Reason: {e}")     
+            return None
