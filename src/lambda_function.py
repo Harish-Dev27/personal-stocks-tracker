@@ -24,10 +24,10 @@ def lambda_handler(event: EventBridgeEvent, context):
     # TODO
     # Send price information to OpenAI model and ask it fetch latest news and give all info mapped with stocks
     ai = OpenAIHelper()
-    ai.chat_with_ai()
+    ai_response = ai.chat_with_ai()
 
     # Once AI message content is ready, send it to end user via telegram bot/AWS SNS
 
-    return LambdaResponse.success_response
+    return LambdaResponse.success_response(200, ai_response)
 
 
