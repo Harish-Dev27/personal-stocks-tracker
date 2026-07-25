@@ -1,12 +1,12 @@
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 from aws_lambda_powertools.utilities.data_classes.event_source  import event_source
 
-import json
 from utils.Logger import logger
 from helper.EnvironmentVars import stocks
 from interface.StocksInfo import StocksInfo
 from helper import LambdaResponse
 from interface.OpenAIHelper import OpenAIHelper
+from helper.SystemPrompt import SystemPrompt
 
 
 '''
@@ -22,25 +22,16 @@ def lambda_handler(event: EventBridgeEvent, context):
     stocks_price = st.get_stocks_latest_price()
     logger.log("INFO", f"Stocks info received {stocks_price}")
 
+    # TODO
+    # This feature of calling external news API is cut down as part of costs risks, can be an extensible
+    # feature in future
 
-    payload = {
-        "stocks": stocks_price,
-        "news": None
-    }
-
-    prompt = f"""
-    Please analyse the following market data.
-
-    {json.dumps(payload, indent=2)}
-
-    Generate the report.
-    """
-
-    # Send price information to OpenAI model and ask it fetch latest news and give all info mapped with stocks
-    ai = OpenAIHelper(prompt)
+    # Send price information OpenAI model and ask it fetch latest news and give all info mapped with stocks
+    ai = OpenAIHelper(SystemPrompt.get_user_prompt(stocks_price))
     ai_response = ai.chat_with_ai()
 
-    # Once AI message content is ready, send it to end user via telegram bot/AWS SNS
+    # TODO
+    # Send it to end user via telegram bot/AWS SNS
 
     return LambdaResponse.success_response(200, ai_response)
 

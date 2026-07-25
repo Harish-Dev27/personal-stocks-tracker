@@ -2,6 +2,7 @@ from openai import OpenAI
 from helper.GetSecrets import GetSecrets
 from utils.Logger import logger
 from helper.SystemPrompt import SystemPrompt
+from helper.EnvironmentVars import ai_model
 
 class OpenAIHelper:
 
@@ -9,10 +10,19 @@ class OpenAIHelper:
         self.client = OpenAI(api_key=GetSecrets.get_secret())
         self.user_prompt = prompt
 
-
+    """
+    Using tool search capabilties instead of external API to cut down cost,
+    but its risky that this can cause longer response times causing server compute
+    usage being increased as well as extreme use of tokens
+    """
     def chat_with_ai(self):
         response = self.client.responses.create(
-            model="gpt-5-mini",
+            model=ai_model,
+            tools=[
+                {
+                    "type": "web_search"
+                }
+            ],
             input=[
                 {
                     "role": "system",
@@ -22,9 +32,10 @@ class OpenAIHelper:
                     "role": "user",
                     "content": self.user_prompt
                 }
-            ],
-            temperature=0.3
+            ]
         )
+
+        logger.log("WARN", f"Number of tokens exhausted as part of this request: {response.usage}")
 
         logger.log("INFO", f"{response.output_text=}")
 
