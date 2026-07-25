@@ -1,6 +1,7 @@
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 from aws_lambda_powertools.utilities.data_classes.event_source  import event_source
 
+import json
 from utils.Logger import logger
 from helper.EnvironmentVars import stocks
 from interface.StocksInfo import StocksInfo
@@ -21,9 +22,22 @@ def lambda_handler(event: EventBridgeEvent, context):
     stocks_price = st.get_stocks_latest_price()
     logger.log("INFO", f"Stocks info received {stocks_price}")
 
-    # TODO
+
+    payload = {
+        "stocks": stocks_price,
+        "news": None
+    }
+
+    prompt = f"""
+    Please analyse the following market data.
+
+    {json.dumps(payload, indent=2)}
+
+    Generate the report.
+    """
+
     # Send price information to OpenAI model and ask it fetch latest news and give all info mapped with stocks
-    ai = OpenAIHelper()
+    ai = OpenAIHelper(prompt)
     ai_response = ai.chat_with_ai()
 
     # Once AI message content is ready, send it to end user via telegram bot/AWS SNS
