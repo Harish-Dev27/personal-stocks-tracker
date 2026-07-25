@@ -23,6 +23,12 @@ class OpenAIHelper:
                     "type": "web_search"
                 }
             ],
+            reasoning={
+                "effort": "minimal"
+            },
+            text={
+                "verbosity": "low"
+            },
             input=[
                 {
                     "role": "system",

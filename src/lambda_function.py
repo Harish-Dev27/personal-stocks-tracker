@@ -27,12 +27,16 @@ def lambda_handler(event: EventBridgeEvent, context):
     # feature in future
 
     # Send price information OpenAI model and ask it fetch latest news and give all info mapped with stocks
-    ai = OpenAIHelper(SystemPrompt.get_user_prompt(stocks_price))
-    ai_response = ai.chat_with_ai()
+    stocks_news = []
+    for stock in stocks_price:
+        ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock))
+        stocks_news.append(ai.chat_with_ai())
+
+    logger.log(f"Final content to be served to the user:: {stocks_news}")
 
     # TODO
     # Send it to end user via telegram bot/AWS SNS
 
-    return LambdaResponse.success_response(200, ai_response)
+    return LambdaResponse.success_response(200, "Successfully excuted the request")
 
 
