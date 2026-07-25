@@ -16,3 +16,5 @@ class OpenAIHelper:
 
         logger.log("INFO", f"{response.output_text=}")
 
+        return response.output_text
+
