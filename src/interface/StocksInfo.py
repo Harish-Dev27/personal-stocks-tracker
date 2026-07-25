@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 from utils.Logger import logger
-from model import StockQuote
+from models.StockQuote import StockQuote
 
 class StocksInfo:
 
@@ -18,7 +18,7 @@ class StocksInfo:
             stock_info_list = []
             for stock in self.stocks: 
                 stock_info = yf.Ticker(f"{stock.upper()}.NS")
-                stock_info_list.append(self.to_stock_quote(stock_info.history(period="1d")))
+                stock_info_list.append(self.to_stock_quote(stock, stock_info.history(period="1d")))
 
             return stock_info_list
         except Exception as e:
