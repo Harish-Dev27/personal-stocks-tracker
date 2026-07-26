@@ -1,7 +1,6 @@
 import boto3
 import json
 from botocore.exceptions import ClientError
-from helper.EnvironmentVars import api_key_secret
 
 class GetSecrets:
 
@@ -9,9 +8,9 @@ class GetSecrets:
         pass
 
     @staticmethod
-    def get_secret():
+    def get_secret(secret: str):
 
-        secret_name = api_key_secret
+        secret_name = secret
         region_name = "ap-south-1"
 
         # Create a Secrets Manager client
@@ -31,4 +30,4 @@ class GetSecrets:
         secret = get_secret_value_response['SecretString']
         actual_secret = json.loads(secret)
 
-        return actual_secret["api-key"]
+        return actual_secret

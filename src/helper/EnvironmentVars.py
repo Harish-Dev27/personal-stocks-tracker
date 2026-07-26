@@ -5,5 +5,6 @@ import os
 
 stocks = os.getenv("STOCKS", "")
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-api_key_secret = os.getenv("AI_API_KEY_SECRET", "open-ai-api-key")
-ai_model = os.getenv("AI_MODEL", "gpt-5")
+app_secret_name = os.getenv("APP_SECRET_NAME", "app-secret")
+ai_model = os.getenv("AI_MODEL", "gpt-5-mini")
+telegram_url = os.getenv("BOT_URL", "https://api.telegram.org/bot{token}/sendMessage")
