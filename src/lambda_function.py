@@ -9,11 +9,15 @@ from interface.OpenAIHelper import OpenAIHelper
 from interface.TelegramBotMessenger import TelegramBotMessenger
 from helper.SystemPrompt import SystemPrompt
 from helper.GetSecrets import GetSecrets
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
 
 
 '''
-This function will be triggered by Eventbridge scheduler every day once
+This function will be triggered by Eventbridge scheduler once every week on Mon-Fri only
+Cron expression has been adjusted accordingly
 '''
 @event_source(data_class=EventBridgeEvent)
 def lambda_handler(event: EventBridgeEvent, context):
@@ -31,17 +35,21 @@ def lambda_handler(event: EventBridgeEvent, context):
     app_secret = GetSecrets.get_secret(app_secret_name)
 
     # Send price information to OpenAI model and ask it to fetch latest news and give all info mapped with stocks
+    # Get news about stocks only on tues & thurs (As tokens usage is massive and is around 30k)
     stocks_news = []
-    for stock in stocks_price:
-        ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"])
-        stocks_news.append(ai.chat_with_ai())
+    if(should_fetch_news()):
+        for stock in stocks_price:
+            ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"])
+            stocks_news.append(ai.chat_with_ai())
+    else:
+        stocks_news.append(stocks_price)
 
     final_message = (
             f"<b>📈 Daily Stock Briefing ({date.today():%d %b %Y})</b>\n\n"
             + "\n\n━━━━━━━━━━━━━━━━━━\n\n".join(stocks_news)
         )
 
-    logger.log(f"Final content to be served to the user:: {final_message}")
+    logger.log("INFO", f"Final content to be served to the user:: {final_message}")
 
     # Send it to end user via telegram bot
     messenger = TelegramBotMessenger(app_secret)
@@ -49,6 +57,22 @@ def lambda_handler(event: EventBridgeEvent, context):
 
     logger.log("INFO", "Successfully published message to the user")
 
-    return LambdaResponse.success_response(200, "Successfully excuted the request")
+    return LambdaResponse.success_response(200, "Successfully executed the request")
+
+
+
+"""
+Evaluate the day for current day and proceed accordingly
+"""
+def should_fetch_news() -> bool:
+    """
+    Returns True only on Tuesday and Thursday (IST).
+    """
+    today = datetime.now(IST).weekday()
+
+    # Monday=0, Tuesday=1, Wednesday=2,
+    # Thursday=3, Friday=4, Saturday=5, Sunday=6
+    logger.log("INFO", f"Today is {datetime.now(IST)}, hence invoking AI for news accordingly.")
+    return today in (1, 3)
 
 
