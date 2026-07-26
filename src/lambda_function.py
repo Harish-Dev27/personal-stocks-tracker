@@ -37,12 +37,10 @@ def lambda_handler(event: EventBridgeEvent, context):
     # Send price information to OpenAI model and ask it to fetch latest news and give all info mapped with stocks
     # Get news about stocks only on tues & thurs (As tokens usage is massive and is around 30k)
     stocks_news = []
-    if(should_fetch_news()):
-        for stock in stocks_price:
-            ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"])
-            stocks_news.append(ai.chat_with_ai())
-    else:
-        stocks_news.append(stocks_price)
+    for stock in stocks_price:
+        ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"], True if should_fetch_news() else False)
+        stocks_news.append(ai.chat_with_ai())
+
 
     final_message = (
             f"<b>📈 Daily Stock Briefing ({date.today():%d %b %Y})</b>\n\n"
