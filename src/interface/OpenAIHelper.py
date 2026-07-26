@@ -5,9 +5,10 @@ from helper.EnvironmentVars import ai_model
 
 class OpenAIHelper:
 
-    def __init__(self, prompt, key):
+    def __init__(self, prompt, key, should_fetch_news = False):
         self.client = OpenAI(api_key=key)
         self.user_prompt = prompt
+        self.fetch_news = should_fetch_news
 
     """
     Using tool search capabilties instead of external API to cut down cost,
@@ -28,7 +29,11 @@ class OpenAIHelper:
             input=[
                 {
                     "role": "system",
-                    "content": SystemPrompt.get_system_prompt()
+                    "content": (
+                        SystemPrompt.get_system_prompt()
+                        if self.fetch_news
+                        else SystemPrompt.get_news_free_sys_prompt()
+                    )
                 },
                 {
                     "role": "user",
