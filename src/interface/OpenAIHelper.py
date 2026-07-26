@@ -1,13 +1,12 @@
 from openai import OpenAI
-from helper.GetSecrets import GetSecrets
 from utils.Logger import logger
 from helper.SystemPrompt import SystemPrompt
 from helper.EnvironmentVars import ai_model
 
 class OpenAIHelper:
 
-    def __init__(self, prompt):
-        self.client = OpenAI(api_key=GetSecrets.get_secret())
+    def __init__(self, prompt, key):
+        self.client = OpenAI(api_key=key)
         self.user_prompt = prompt
 
     """
@@ -23,9 +22,6 @@ class OpenAIHelper:
                     "type": "web_search"
                 }
             ],
-            reasoning={
-                "effort": "minimal"
-            },
             text={
                 "verbosity": "low"
             },
@@ -41,7 +37,11 @@ class OpenAIHelper:
             ]
         )
 
-        logger.log("WARN", f"Number of tokens exhausted as part of this request: {response.usage}")
+        usage = response.usage
+
+        logger.log("WARN",
+            f"Stock {self.user_prompt} - input={usage.input_tokens} output={usage.output_tokens} total={usage.total_tokens}",
+        )
 
         logger.log("INFO", f"{response.output_text=}")
 
