@@ -5,6 +5,7 @@ from typing import Optional
 from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools import Logger as PowertoolsLogger
+
 from helper.EnvironmentVars import log_level
 
 

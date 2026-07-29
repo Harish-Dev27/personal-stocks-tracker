@@ -1,7 +1,8 @@
-import yfinance as yf
 import pandas as pd
-from utils.Logger import logger
+import yfinance as yf
+
 from models.StockQuote import StockQuote
+from utils.Logger import logger
 
 class StocksInfo:
 
@@ -9,11 +10,11 @@ class StocksInfo:
         self.stocks = stocks.strip().split(",") #list of stocks whose info needs to be extracted
 
 
-    """
-    First get the stock prices form the Yahoo Finance
-    and then populate it into a list
-    """
     def get_stocks_latest_price(self):
+        """
+         First get the stock prices form the Yahoo Finance
+         and then populate it into a list
+        """
         try:
             stock_info_list = []
             for stock in self.stocks: 
@@ -25,10 +26,11 @@ class StocksInfo:
             logger.error(f"ERROR", "Unable to get stocks information. Reason: {e}")     
             return None
 
-    """
-    Mapper function to convert the DataFrame type obj into StockQuote type
-    """
     def to_stock_quote(self, symbol: str, df: pd.DataFrame) -> StockQuote:
+        """
+        Mapper function to convert the DataFrame type obj into StockQuote type
+        """
+
         latest = df.iloc[-1]
 
         return StockQuote(

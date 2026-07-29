@@ -1,7 +1,9 @@
-from interface.NotificationService import NotificationService
-from helper.EnvironmentVars import telegram_url
-from utils.Logger import logger
 import requests
+
+from helper.EnvironmentVars import telegram_url
+from interface.NotificationService import NotificationService
+from utils.Logger import logger
+from exceptions import TelegramBotException
 
 class TelegramBotMessenger(NotificationService):
 
@@ -14,15 +16,18 @@ class TelegramBotMessenger(NotificationService):
 
         logger.log("DEBUG", f"Preview message content: {message}")
 
-        try:
-            requests.post(
-                telegram_url.replace("{token}", self.token),
-                json={
-                    "chat_id": self.chat_id,
-                    "text": message,
-                    "parse_mode": "HTML",
-                    "disable_web_page_preview": True,
-                },
-            )
-        except Exception as e:
-            logger.log("ERROR", f"Unable to publish message to the bot. Reason:{e}")
+        # Publish message content with requests
+        response = requests.post(
+            telegram_url.replace("{token}", self.token),
+            json={
+                "chat_id": self.chat_id,
+                "text": message,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True,
+            },
+        )
+
+        if(response.status_code != 200):
+            raise TelegramBotException(status_code = response.status_code ,
+                                       message = f"Unable to publish message to user. Reason: {response.json}")
+

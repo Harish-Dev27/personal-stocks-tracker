@@ -1,5 +1,5 @@
-from dataclasses import asdict
 import json
+from dataclasses import asdict
 
 class SystemPrompt:
 
@@ -68,7 +68,7 @@ class SystemPrompt:
 
             Briefly summarize today's trading activity in a friendly, factual tone.
 
-            Return ONLY Telegram-compatible HTML.
+            Return ONLY Telegram-compatible HTML. It shouldn't execeed 4096 characters strictly as thats the limit for a message.
 
             Use ONLY these HTML tags:
             <b>, <i>, <code>
