@@ -1,4 +1,5 @@
-from datetime import date, datetime
+from datetime import datetime
+
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
 from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 
@@ -10,8 +11,6 @@ from interface.OpenAIHelper import OpenAIHelper
 from interface.StocksInfo import StocksInfo
 from interface.TelegramBotMessenger import TelegramBotMessenger
 from utils.Logger import logger
-
-
 
 
 @event_source(data_class=EventBridgeEvent)
@@ -36,14 +35,17 @@ def lambda_handler(event: EventBridgeEvent, context):
         # Send price information to OpenAI model
         stocks_news = []
         for stock in stocks_price:
-            ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"], True if should_fetch_news() else False)
+            ai = OpenAIHelper(
+                SystemPrompt.get_user_prompt(stock),
+                app_secret["api-key"],
+                bool(should_fetch_news()),
+            )
             stocks_news.append(ai.chat_with_ai())
 
-
         final_message = (
-                f"<b>📈 Daily Stock Briefing ({date.today():%d %b %Y})</b>\n\n"
-                + "\n\n━━━━━━━━━━━━━━━━━━\n\n".join(stocks_news)
-            )
+            f"<b>📈 Daily Stock Briefing ({datetime.now(ist).date():%d %b %Y})</b>\n\n"
+            + "\n\n━━━━━━━━━━━━━━━━━━\n\n".join(stocks_news)
+        )
 
         logger.log("INFO", f"Final content to be served to the user:: {final_message}")
 
@@ -59,19 +61,17 @@ def lambda_handler(event: EventBridgeEvent, context):
         return LambdaResponse.error_response(500, "Server error")
 
 
-
-
 def should_fetch_news() -> bool:
     """
     Returns True only on Tuesday and Thursday (IST).
-    This is actually an extra check to avoid unnecessary token exhaustion, as Cloudwatch 
+    This is actually an extra check to avoid unnecessary token exhaustion, as Cloudwatch
     triggers on Monday and Tuesday only
     """
     today = datetime.now(ist).weekday()
 
     # Monday=0, Tuesday=1, Wednesday=2,
     # Thursday=3, Friday=4, Saturday=5, Sunday=6
-    logger.log("INFO", f"Today is {datetime.now(IST)}, hence invoking AI for news accordingly.")
+    logger.log(
+        "INFO", f"Today is {datetime.now(ist)}, hence invoking AI for news accordingly."
+    )
     return today in (1, 3)
-
-

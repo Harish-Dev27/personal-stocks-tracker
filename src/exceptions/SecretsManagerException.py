@@ -1,5 +1,5 @@
-class TelegramBotException(Exception):
-    """Custom exception for Telegram bot failures."""
+class SecretsManagerException(Exception):
+    """Custom exception for Secrets retrieval failures."""
 
     def __init__(self, message: str, status_code: int = 500):
         super().__init__(message)

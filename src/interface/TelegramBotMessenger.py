@@ -1,12 +1,12 @@
 import requests
 
+from exceptions import TelegramBotException
 from helper.EnvironmentVars import telegram_url
 from interface.NotificationService import NotificationService
 from utils.Logger import logger
-from exceptions import TelegramBotException
+
 
 class TelegramBotMessenger(NotificationService):
-
     def __init__(self, secret):
         self.token = secret["telegram-bot-token"]
         self.chat_id = secret["telegram-chat-id"]
@@ -27,7 +27,8 @@ class TelegramBotMessenger(NotificationService):
             },
         )
 
-        if(response.status_code != 200):
-            raise TelegramBotException(status_code = response.status_code ,
-                                       message = f"Unable to publish message to user. Reason: {response.json}")
-
+        if response.status_code != 200:
+            raise TelegramBotException(
+                status_code=response.status_code,
+                message=f"Unable to publish message to user. Reason: {response.json}",
+            )

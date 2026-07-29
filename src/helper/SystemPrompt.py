@@ -1,8 +1,8 @@
 import json
 from dataclasses import asdict
 
-class SystemPrompt:
 
+class SystemPrompt:
     def __init__(self):
         pass
 
@@ -90,12 +90,7 @@ class SystemPrompt:
     @staticmethod
     def get_user_prompt(stocks_info):
         payload = {
-            "stocks": [
-                {
-                    **asdict(stocks_info),
-                    "date": stocks_info.date.isoformat()
-                }
-            ]
+            "stocks": [{**asdict(stocks_info), "date": stocks_info.date.isoformat()}]
         }
 
         return f"""
