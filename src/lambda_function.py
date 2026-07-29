@@ -1,76 +1,77 @@
+from datetime import datetime
+
 from aws_lambda_powertools.utilities.data_classes import EventBridgeEvent
-from aws_lambda_powertools.utilities.data_classes.event_source  import event_source
+from aws_lambda_powertools.utilities.data_classes.event_source import event_source
 
-from utils.Logger import logger
-from helper.EnvironmentVars import stocks, app_secret_name
-from interface.StocksInfo import StocksInfo
 from helper import LambdaResponse
-from interface.OpenAIHelper import OpenAIHelper
-from interface.TelegramBotMessenger import TelegramBotMessenger
-from helper.SystemPrompt import SystemPrompt
+from helper.EnvironmentVars import app_secret_name, ist, stocks
 from helper.GetSecrets import GetSecrets
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from helper.SystemPrompt import SystemPrompt
+from interface.OpenAIHelper import OpenAIHelper
+from interface.StocksInfo import StocksInfo
+from interface.TelegramBotMessenger import TelegramBotMessenger
+from utils.Logger import logger
 
-IST = ZoneInfo("Asia/Kolkata")
 
-
-'''
-This function will be triggered by Eventbridge scheduler once every week on Mon-Fri only
-Cron expression has been adjusted accordingly
-'''
 @event_source(data_class=EventBridgeEvent)
+@logger._logger(clear_state=True)
 def lambda_handler(event: EventBridgeEvent, context):
-    logger.log("INFO", "Lambda invoked")
-    logger.log("INFO", f"Received event: {event.raw_event}")
+    """
+    This function will be triggered by Eventbridge scheduler once every week on Mon-Fri only
+    Cron expression has been adjusted accordingly
+    """
 
-    # Get stocks prices for the current date of time
-    st = StocksInfo(stocks)
-    stocks_price = st.get_stocks_latest_price()
-    logger.log("INFO", f"Stocks info received {stocks_price}")
+    try:
+        logger.log("INFO", "Lambda invoked")
+        logger.log("INFO", f"Received event: {event.raw_event}")
 
-    # TODO
-    # This feature of calling external news API is cut down as part of costs risks
+        # Get stocks prices for the current date and time
+        st = StocksInfo(stocks)
+        stocks_price = st.get_stocks_latest_price()
+        logger.log("INFO", f"Stocks info received {stocks_price}")
 
-    app_secret = GetSecrets.get_secret(app_secret_name)
+        app_secret = GetSecrets.get_secret(app_secret_name)
 
-    # Send price information to OpenAI model and ask it to fetch latest news and give all info mapped with stocks
-    # Get news about stocks only on tues & thurs (As tokens usage is massive and is around 30k)
-    stocks_news = []
-    for stock in stocks_price:
-        ai = OpenAIHelper(SystemPrompt.get_user_prompt(stock), app_secret["api-key"], True if should_fetch_news() else False)
-        stocks_news.append(ai.chat_with_ai())
+        # Send price information to OpenAI model
+        stocks_news = []
+        for stock in stocks_price:
+            ai = OpenAIHelper(
+                SystemPrompt.get_user_prompt(stock),
+                app_secret["api-key"],
+                bool(should_fetch_news()),
+            )
+            stocks_news.append(ai.chat_with_ai())
 
-
-    final_message = (
-            f"<b>📈 Daily Stock Briefing ({date.today():%d %b %Y})</b>\n\n"
+        final_message = (
+            f"<b>📈 Daily Stock Briefing ({datetime.now(ist).date():%d %b %Y})</b>\n\n"
             + "\n\n━━━━━━━━━━━━━━━━━━\n\n".join(stocks_news)
         )
 
-    logger.log("INFO", f"Final content to be served to the user:: {final_message}")
+        logger.log("INFO", f"Final content to be served to the user:: {final_message}")
 
-    # Send it to end user via telegram bot
-    messenger = TelegramBotMessenger(app_secret)
-    messenger.send_message(final_message)
+        # Send it to end user via telegram bot
+        messenger = TelegramBotMessenger(app_secret)
+        messenger.send_message(final_message)
 
-    logger.log("INFO", "Successfully published message to the user")
+        logger.log("INFO", "Successfully published message to the user")
 
-    return LambdaResponse.success_response(200, "Successfully executed the request")
+        return LambdaResponse.success_response(200, "Successfully executed the request")
+    except Exception as e:
+        logger.log("ERROR", f"Unable to complete the request successfully. Reason {e}")
+        return LambdaResponse.error_response(500, "Server error")
 
 
-
-"""
-Evaluate the day for current day and proceed accordingly
-"""
 def should_fetch_news() -> bool:
     """
     Returns True only on Tuesday and Thursday (IST).
+    This is actually an extra check to avoid unnecessary token exhaustion, as Cloudwatch
+    triggers on Monday and Tuesday only
     """
-    today = datetime.now(IST).weekday()
+    today = datetime.now(ist).weekday()
 
     # Monday=0, Tuesday=1, Wednesday=2,
     # Thursday=3, Friday=4, Saturday=5, Sunday=6
-    logger.log("INFO", f"Today is {datetime.now(IST)}, hence invoking AI for news accordingly.")
+    logger.log(
+        "INFO", f"Today is {datetime.now(ist)}, hence invoking AI for news accordingly."
+    )
     return today in (1, 3)
-
-

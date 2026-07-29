@@ -1,22 +1,24 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools import Logger as PowertoolsLogger
+
 from helper.EnvironmentVars import log_level
 
 
 class Logger:
-    _instance: Optional["Logger"] = None
+    _instance: Logger | None = None
 
-    def __new__(cls, *args, **kwargs) -> "Logger":
+    def __new__(cls, *args, **kwargs) -> Logger:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, service: str = "personal-stocks-tracker", level: str = log_level) -> None:
+    def __init__(
+        self, service: str = "personal-stocks-tracker", level: str = log_level
+    ) -> None:
         if getattr(self, "_initialized", False):
             return
 

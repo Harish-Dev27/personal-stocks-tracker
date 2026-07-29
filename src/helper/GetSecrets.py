@@ -1,9 +1,12 @@
-import boto3
 import json
+
+import boto3
 from botocore.exceptions import ClientError
 
-class GetSecrets:
+from exceptions import SecretsManagerException
 
+
+class GetSecrets:
     def __init__(self):
         pass
 
@@ -15,19 +18,14 @@ class GetSecrets:
 
         # Create a Secrets Manager client
         session = boto3.session.Session()
-        client = session.client(
-            service_name='secretsmanager',
-            region_name=region_name
-        )
+        client = session.client(service_name="secretsmanager", region_name=region_name)
 
         try:
-            get_secret_value_response = client.get_secret_value(
-                SecretId=secret_name
-            )
+            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
         except ClientError as e:
-            raise e
+            raise SecretsManagerException(e)
 
-        secret = get_secret_value_response['SecretString']
+        secret = get_secret_value_response["SecretString"]
         actual_secret = json.loads(secret)
 
         return actual_secret

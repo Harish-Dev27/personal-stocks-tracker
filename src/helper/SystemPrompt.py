@@ -1,8 +1,8 @@
-from dataclasses import asdict
 import json
+from dataclasses import asdict
+
 
 class SystemPrompt:
-
     def __init__(self):
         pass
 
@@ -68,7 +68,7 @@ class SystemPrompt:
 
             Briefly summarize today's trading activity in a friendly, factual tone.
 
-            Return ONLY Telegram-compatible HTML.
+            Return ONLY Telegram-compatible HTML. It shouldn't execeed 4096 characters strictly as thats the limit for a message.
 
             Use ONLY these HTML tags:
             <b>, <i>, <code>
@@ -90,12 +90,7 @@ class SystemPrompt:
     @staticmethod
     def get_user_prompt(stocks_info):
         payload = {
-            "stocks": [
-                {
-                    **asdict(stocks_info),
-                    "date": stocks_info.date.isoformat()
-                }
-            ]
+            "stocks": [{**asdict(stocks_info), "date": stocks_info.date.isoformat()}]
         }
 
         return f"""
