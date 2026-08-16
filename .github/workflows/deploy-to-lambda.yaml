@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: stocks-tracker-lambda
-  LAMBDA_FUNCTION_NAME: my-sample-function
+  S3_BUCKET: my-pers-lambdas
+  LAMBDA_FUNCTION_NAME: stocks-tracker
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload ZIP to S3
         run: |
-          aws s3 cp lambda.zip s3://${S3_BUCKET}/lambda.zip
+          aws s3 cp lambda.zip s3://${S3_BUCKET}/${LAMBDA_FUNCTION_NAME}/lambda.zip
 
       - name: Update Lambda
         run: |

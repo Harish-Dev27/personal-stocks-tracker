@@ -5,9 +5,9 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: stocks-tracker-lambda
+  S3_BUCKET: my-pers-lambdas
   LAYER_NAME: lambda-layer
-  LAMBDA_FUNCTION_NAME: my-sample-function
+  LAMBDA_FUNCTION_NAME: stocks-tracker
 
 jobs:
   deploy-layer:
@@ -51,14 +51,14 @@ jobs:
 
       - name: Upload Layer to S3
         run: |
-          aws s3 cp layer.zip s3://$S3_BUCKET/lambda-layer.zip
+          aws s3 cp layer.zip s3://$S3_BUCKET/$LAMBDA_FUNCTION_NAME/lambda-layer.zip
 
       - name: Publish Layer Version
         id: publish
         run: |
           LAYER_VERSION_ARN=$(aws lambda publish-layer-version \
             --layer-name "$LAYER_NAME" \
-            --content S3Bucket=$S3_BUCKET,S3Key=lambda-layer.zip \
+            --content S3Bucket=$S3_BUCKET,S3Key=$LAMBDA_FUNCTION_NAME/lambda-layer.zip \
             --compatible-runtimes python3.14 \
             --query LayerVersionArn \
             --output text)

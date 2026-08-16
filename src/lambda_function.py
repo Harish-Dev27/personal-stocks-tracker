@@ -14,7 +14,7 @@ from utils.Logger import logger
 
 
 @event_source(data_class=EventBridgeEvent)
-@logger._logger(clear_state=True)
+# @logger._logger(clear_state=True)
 def lambda_handler(event: EventBridgeEvent, context):
     """
     This function will be triggered by Eventbridge scheduler once every week on Mon-Fri only
