@@ -84,6 +84,24 @@ The code reads this secret from AWS Secrets Manager using the `ap-south-1` regio
 
 This repository is designed to run in an AWS Lambda environment and is intended to be triggered by EventBridge or another scheduled event. The Lambda handler is [src/lambda_function.py](src/lambda_function.py).
 
+## Infrastructure (Terraform)
+
+This project includes a small Terraform configuration in the `infra/` folder to provision the AWS resources the Lambda needs (S3 bucket for code, IAM role/policies, Lambda, CloudWatch Log Group, and EventBridge Scheduler).
+
+Quick commands to apply infrastructure changes:
+
+```bash
+cd infra
+terraform init
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
+```
+
+Notes:
+- The Lambda package is referenced by `s3_bucket` + `s3_key` only (Terraform does not track object versions). Upload your ZIP from CI before using the object.
+- The scheduler uses EventBridge Scheduler (`aws_scheduler_schedule`); if `terraform init` errors, upgrade the AWS provider in your Terraform config.
+
+
 ## Notes
 
 - The project currently uses OpenAI web search tooling on Tuesday and Thursday only to reduce cost and token usage.
