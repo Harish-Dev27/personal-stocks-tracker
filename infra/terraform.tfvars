@@ -1,5 +1,5 @@
 env                  = "prod"
-lambda_s3_key        = "personal-stocks-tracker/lambda.zip"
+lambda_s3_key        = "stocks-tracker/lambda.zip"
 lambda_function_name = "stocks-tracker"
 lambda_bucket_name   = "my-pers-lambdas"
 
