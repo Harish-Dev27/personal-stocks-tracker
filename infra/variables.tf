@@ -41,7 +41,7 @@ variable "lambda_bucket_name" {
   default     = "my-pers-lambdas"
 }
 
-variable "eventbridge_scheduler_name"{
+variable "eventbridge_scheduler_name" {
   description = "Eventbridge trigger name"
   type        = string
   default     = "lambda-trigger"
