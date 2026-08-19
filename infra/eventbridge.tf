@@ -5,9 +5,9 @@ resource "aws_iam_role" "scheduler_invoke_role" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = { Service = "scheduler.amazonaws.com" }
-        Action = "sts:AssumeRole"
+        Action    = "sts:AssumeRole"
       }
     ]
   })
@@ -21,8 +21,8 @@ resource "aws_iam_role_policy" "scheduler_invoke_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["lambda:InvokeFunction"]
+        Effect   = "Allow"
+        Action   = ["lambda:InvokeFunction"]
         Resource = [aws_lambda_function.stocks_tracker.arn]
       }
     ]
@@ -30,9 +30,9 @@ resource "aws_iam_role_policy" "scheduler_invoke_policy" {
 }
 
 resource "aws_scheduler_schedule" "weekly_tuesday" {
-  name                = var.eventbridge_scheduler_name
-  description         = "Triggers stocks-tracker Lambda every Tuesday"
-  schedule_expression = "cron(30 9 ? * TUE *)"
+  name                         = var.eventbridge_scheduler_name
+  description                  = "Triggers stocks-tracker Lambda every Tuesday"
+  schedule_expression          = "cron(30 9 ? * TUE *)"
   schedule_expression_timezone = "Asia/Calcutta"
 
   flexible_time_window {
